@@ -1,0 +1,21 @@
+[package]
+name = "hobbits-rs"
+version = "0.1.0"
+authors = ["Kevin Kelley <kevin@kelleysoft.com>"]
+edition = "2018"
+description = "Implementation of the Hobbits protocol for Rust"
+homepage = "https://github.com/KevinKelley/hobbits-rs"
+repository = "https://github.com/KevinKelley/hobbits-rs"
+readme = "README.md"
+license = "MIT/Apache-2.0"
+include = [
+    "**/*.rs",
+    "Cargo.toml"
+]
+
+[dependencies]
+
+[build-dependencies]
+
+[features]
+#debug_msgs = []
