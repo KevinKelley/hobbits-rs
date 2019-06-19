@@ -1,5 +1,5 @@
 [package]
-name = "hobbits-rs"
+name = "hobbits"
 version = "0.1.0"
 authors = ["Kevin Kelley <kevin@kelleysoft.com>"]
 edition = "2018"
@@ -14,8 +14,11 @@ include = [
 ]
 
 [dependencies]
+tokio = "0.1.21"
+getopts = "0.2"
 
-[build-dependencies]
 
-[features]
+# [build-dependencies]
+# [dev-dependencies]
+# [features]
 #debug_msgs = []
