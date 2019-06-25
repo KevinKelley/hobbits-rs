@@ -9,43 +9,33 @@ use tokio::net::TcpListener;
 
 extern crate hobbits;
 
-//use hobbits::{read_source};
-use hobbits::tcp::server::{klk};
+use hobbits::tcp::server::*;
 use hobbits::encoding::{marshal, unmarshal, Message};
 
 
 fn main() {
 
-    klk();
-    marshal(Message {
-        version: "123".to_string(),
-        protocol: "123".to_string(),
-        header:vec!(),
-        body: vec!(),
-    });
+    let msg = Message {
+        version: "0.2".to_string(),
+        protocol: "GOSSIP".to_string(),
+        header:"hdr".as_bytes().to_vec(),
+        body: "body".as_bytes().to_vec(),
+    };
+    println!("{}\n{:?}", msg, msg);
+
+    let serialized = serde_json::to_string(&msg).unwrap();
+    println!("serialized = {}", serialized);
+
+    let deserialized: Message = serde_json::from_str(&serialized).unwrap();
+    println!("deserialized = {:?}", deserialized);
 
 
     // Parse command-line options:
     let mut opts = getopts::Options::new();
     opts.optopt("h", "host", "server to connect", "HOST");
     opts.optopt("p", "port", "port", "PORT");
-    opts.optopt("o", "output", "Output file", "FILENAME");
-    opts.optopt("f", "format", "Output file format", "png | pdf");
 
     let matches = opts.parse(std::env::args().skip(1)).unwrap();
-    let str_arg = |flag: &str, default: &str| -> String {
-        matches.opt_str(flag).unwrap_or(default.to_string())
-    };
-
-    // Choose a format:
-    let _png = match &str_arg("f", "png")[..] {
-        "png" => true,
-        "pdf" => false,
-        x => panic!("Unknown output format: {}", x),
-    };
-    // Read input files:
-    //let _html = read_source(str_arg("h", "examples/test.html"));
-
     let host = matches.opt_str("host").unwrap_or("127.0.0.1".to_string());
     let port = matches.opt_str("port").unwrap_or("12345".to_string());
 
@@ -53,6 +43,8 @@ fn main() {
     let addr = format!("{}:{}", host, port).parse().unwrap();
     let listener = TcpListener::bind(&addr)
         .expect("unable to bind TCP listener");
+
+if true {return};
 
     // Pull out a stream of sockets for incoming connections
     let server = listener.incoming()
@@ -84,8 +76,8 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+    // #[test]
+    // fn it_works() {
+    //     assert_eq!(2 + 2, 4);
+    // }
 }

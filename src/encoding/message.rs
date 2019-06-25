@@ -14,7 +14,11 @@
 // 	Body     []byte
 // }
 
-#[derive(Clone, Hash, Default, PartialEq, Debug)]
+extern crate hex;
+use std::fmt;
+use serde::{Serialize, Deserialize};
+
+#[derive(Clone, Hash, Default, PartialEq, Serialize, Deserialize, Debug)]
 pub struct Message {
     pub version: String,
     pub protocol: String,
@@ -34,6 +38,13 @@ impl Message {
     }
 
 }
+impl fmt::Display for Message {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "EWP {} {} {} {}\n0x{}\n0x{}",
+            self.version, self.protocol, self.header.len(), self.body.len(), hex::encode(&self.header), hex::encode(&self.body))
+	}
+}
+
 
 // func reqParse(req string) Request {
 // 	res := strings.Split(req, "\n")

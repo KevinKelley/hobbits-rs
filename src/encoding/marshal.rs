@@ -1,10 +1,6 @@
-// package encoding
-//
-// import (
-// 	"errors"
-// 	"fmt"
-// )
-//
+
+pub use super::message::{Message};
+
 // // Marshal takes a parsed message and encodes it to a wire protocol message
 // 	func Marshal(message Message) (string, error) {
 // 	if message.Version == "" {
@@ -14,22 +10,8 @@
 // 	if message.Protocol == "" {
 // 		return "", errors.New("cannot marshal message, protocol not found")
 // 	}
-//
-// 	return fmt.Sprintf(
-// 		"EWP %s %s %d %d\n%s%s",
-// 		message.Version,
-// 		message.Protocol,
-// 		len(string(message.Header)),
-// 		len(string(message.Body)),
-// 		string(message.Header),
-// 		string(message.Body),
-// 	), nil
-// }
-
-pub use super::message::{Message};
-
 pub fn marshal(msg: Message) -> Option<Vec<u8>> {
-    assert!(msg.version == "0.2");
+    assert!(msg.version != "");
     assert!(msg.protocol != "");
 
     let header: String = format!("EWP {} {} {} {}\n",
@@ -53,7 +35,6 @@ mod tests {
 
     #[test]
     fn basic_sanity() {
-
         //   - desc: 'no body'
         //     marshalled: "EWP 0.2 PING 0 0\n"
         let mut msg = Message::new("PING", &vec!(), &vec!());
@@ -83,20 +64,28 @@ mod tests {
         // NOTE: those aren't valid Rust control characters...
         msg = Message::new("PING", "\n87654321".as_bytes(), "\n\0\x0a\x0b\x0f\n\r\t\x01\\".as_bytes());
         assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 9 10\n\n87654321\n\0\x0a\x0b\x0f\n\r\t\x01\\".as_bytes());
-
     }
 
-    // - suite: 'test different commands'
-    //   requests:
-    //   - desc: 'PING'
-    //     marshalled: "EWP 0.2 PING 0 0\n"
-    //   - desc: 'FOO'
-    //     marshalled: "EWP 0.2 FOO 0 0\n"
-    //   - desc: 'BAR'
-    //     marshalled: "EWP 0.2 BAR 0 0\n"
-    //   - desc: 'PONG'
-    //     marshalled: "EWP 0.2 PONG 0 0\n"
-    //   responses: []
+    #[test]
+    fn different_commands() {
+        //   - desc: 'PING'
+        //     marshalled: "EWP 0.2 PING 0 0\n"
+        let mut msg = Message::new("PING", &vec!(), &vec!());
+        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 0 0\n".as_bytes());
+        //   - desc: 'FOO'
+        //     marshalled: "EWP 0.2 FOO 0 0\n"
+        msg = Message::new("FOO", &vec!(), &vec!());
+        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 FOO 0 0\n".as_bytes());
+        //   - desc: 'BAR'
+        //     marshalled: "EWP 0.2 BAR 0 0\n"
+        msg = Message::new("BAR", &vec!(), &vec!());
+        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 BAR 0 0\n".as_bytes());
+        //   - desc: 'PONG'
+        //     marshalled: "EWP 0.2 PONG 0 0\n"
+        msg = Message::new("PONG", &vec!(), &vec!());
+        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PONG 0 0\n".as_bytes());
+    }
+
 
 
     //
@@ -188,19 +177,5 @@ mod tests {
     // 	}
     // }
     //
-    //
-    // func BenchmarkMarshal(b *testing.B) {
-    // 	message := encoding.Message{
-    // 		Version: "13.5",
-    // 		Protocol: "RPC",
-    // 		Header: []byte("this is a header"),
-    // 		Body: []byte("this is a body"),
-    // 	}
-    //
-    // 	for i := 0; i <= b.N; i++ {
-    // 		encoding.Marshal(message)
-    // 	}
-    // }
-
 
 }

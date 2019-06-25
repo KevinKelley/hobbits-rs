@@ -1,7 +1,7 @@
 
 use super::message::Message;
 
-pub fn unmarshal(_msg: &str) -> Option<Message> {
+pub fn unmarshal(_msg: &[u8]) -> Option<Message> {
     None
 }
 
