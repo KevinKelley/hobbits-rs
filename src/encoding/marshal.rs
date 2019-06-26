@@ -1,16 +1,9 @@
 
 pub use super::message::{Message};
 
-// // Marshal takes a parsed message and encodes it to a wire protocol message
-// 	func Marshal(message Message) (string, error) {
-// 	if message.Version == "" {
-// 		return "", errors.New("cannot marshal message, version not found")
-// 	}
-//
-// 	if message.Protocol == "" {
-// 		return "", errors.New("cannot marshal message, protocol not found")
-// 	}
+/// Marshal takes a parsed message and encodes it to a wire protocol message
 pub fn marshal(msg: Message) -> Option<Vec<u8>> {
+
     assert!(msg.version != "");
     assert!(msg.protocol != "");
 
@@ -86,19 +79,6 @@ mod tests {
         assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PONG 0 0\n".as_bytes());
     }
 
-
-
-    //
-    // import (
-    // 	"errors"
-    // 	"reflect"
-    // 	"strconv"
-    // 	"testing"
-    //
-    // 	"github.com/renaynay/go-hobbits/encoding"
-    // )
-    //
-    // func TestMarshal_Successful(t *testing.T) {
     // 	var test = []struct {
     // 		encoded encoding.Message
     // 		message string
