@@ -46,6 +46,8 @@ fn main() {
 
 if true {return};
 
+    let messages: Vec<Message> = vec!();
+
     // Pull out a stream of sockets for incoming connections
     let server = listener.incoming()
         .map_err(|e| eprintln!("accept failed = {:?}", e))
@@ -76,8 +78,4 @@ if true {return};
 
 #[cfg(test)]
 mod tests {
-    // #[test]
-    // fn it_works() {
-    //     assert_eq!(2 + 2, 4);
-    // }
 }
