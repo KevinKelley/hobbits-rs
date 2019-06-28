@@ -1,8 +1,8 @@
 
-pub use super::message::{Message};
+pub use super::envelope::{Envelope};
 
 /// Marshal takes a parsed message and encodes it to a wire protocol message
-pub fn marshal(msg: Message) -> Option<Vec<u8>> {
+pub fn marshal(msg: Envelope) -> Vec<u8> {
 
     assert!(msg.version != "");
     assert!(msg.protocol != "");
@@ -17,74 +17,74 @@ pub fn marshal(msg: Message) -> Option<Vec<u8>> {
     outbytes.extend(msg.header);
     outbytes.extend(msg.body);
 
-    return Some(outbytes)
+    return outbytes
 }
 
 
 
 #[cfg(test)]
 mod tests {
-    use super::{Message, marshal};
+    use super::{Envelope, marshal};
 
     #[test]
     fn basic_sanity() {
         //   - desc: 'no body'
         //     marshalled: "EWP 0.2 PING 0 0\n"
-        let mut msg = Message::new("PING", &vec!(), &vec!());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 0 0\n".as_bytes());
+        let mut msg = Envelope::new("PING", &vec!(), &vec!());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 0 0\n".as_bytes());
         //   - desc: '10 byte body'
         //     marshalled: "EWP 0.2 PING 0 10\n0123456789"
-        msg = Message::new("PING", &vec!(), "0123456789".as_bytes());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 0 10\n0123456789".as_bytes());
+        msg = Envelope::new("PING", &vec!(), "0123456789".as_bytes());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 0 10\n0123456789".as_bytes());
         //   - desc: '10 byte header'
         //     marshalled: "EWP 0.2 PING 10 0\n0123456789"
-        msg = Message::new("PING", "0123456789".as_bytes(), &vec!());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 10 0\n0123456789".as_bytes());
+        msg = Envelope::new("PING", "0123456789".as_bytes(), &vec!());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 10 0\n0123456789".as_bytes());
         //   - desc: '9 byte header, 10 byte body'
         //     marshalled: "EWP 0.2 PING 9 10\n9876543210123456789"
-        msg = Message::new("PING", "987654321".as_bytes(), "0123456789".as_bytes());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 9 10\n9876543210123456789".as_bytes());
+        msg = Envelope::new("PING", "987654321".as_bytes(), "0123456789".as_bytes());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 9 10\n9876543210123456789".as_bytes());
         //   - desc: '9 byte header, 10 byte body, extra newlines'
         //     marshalled: "EWP 0.2 PING 9 10\n\n876543210123456\n89"
-        msg = Message::new("PING", "\n87654321".as_bytes(), "0123456\n89".as_bytes());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 9 10\n\n876543210123456\n89".as_bytes());
+        msg = Envelope::new("PING", "\n87654321".as_bytes(), "0123456\n89".as_bytes());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 9 10\n\n876543210123456\n89".as_bytes());
         //   - desc: '9 byte header, 10 byte body, extra extra newlines'
         //     marshalled: "EWP 0.2 PING 9 10\n\n87654321\n\n\n\n\n\n\n\n\n\n"
-        msg = Message::new("PING", "\n87654321".as_bytes(), "\n\n\n\n\n\n\n\n\n\n".as_bytes());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 9 10\n\n87654321\n\n\n\n\n\n\n\n\n\n".as_bytes());
+        msg = Envelope::new("PING", "\n87654321".as_bytes(), "\n\n\n\n\n\n\n\n\n\n".as_bytes());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 9 10\n\n87654321\n\n\n\n\n\n\n\n\n\n".as_bytes());
         //   - desc: '9 byte header, 10 byte body, control character montage'
         //     marshalled: "EWP 0.2 PING 9 10\n\n87654321\n\0\a\b\f\n\r\t\v\\"
         // NOTE: those aren't valid Rust control characters...
-        msg = Message::new("PING", "\n87654321".as_bytes(), "\n\0\x0a\x0b\x0f\n\r\t\x01\\".as_bytes());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 9 10\n\n87654321\n\0\x0a\x0b\x0f\n\r\t\x01\\".as_bytes());
+        msg = Envelope::new("PING", "\n87654321".as_bytes(), "\n\0\x0a\x0b\x0f\n\r\t\x01\\".as_bytes());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 9 10\n\n87654321\n\0\x0a\x0b\x0f\n\r\t\x01\\".as_bytes());
     }
 
     #[test]
     fn different_commands() {
         //   - desc: 'PING'
         //     marshalled: "EWP 0.2 PING 0 0\n"
-        let mut msg = Message::new("PING", &vec!(), &vec!());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PING 0 0\n".as_bytes());
+        let mut msg = Envelope::new("PING", &vec!(), &vec!());
+        assert_eq!(marshal(msg), "EWP 0.2 PING 0 0\n".as_bytes());
         //   - desc: 'FOO'
         //     marshalled: "EWP 0.2 FOO 0 0\n"
-        msg = Message::new("FOO", &vec!(), &vec!());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 FOO 0 0\n".as_bytes());
+        msg = Envelope::new("FOO", &vec!(), &vec!());
+        assert_eq!(marshal(msg), "EWP 0.2 FOO 0 0\n".as_bytes());
         //   - desc: 'BAR'
         //     marshalled: "EWP 0.2 BAR 0 0\n"
-        msg = Message::new("BAR", &vec!(), &vec!());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 BAR 0 0\n".as_bytes());
+        msg = Envelope::new("BAR", &vec!(), &vec!());
+        assert_eq!(marshal(msg), "EWP 0.2 BAR 0 0\n".as_bytes());
         //   - desc: 'PONG'
         //     marshalled: "EWP 0.2 PONG 0 0\n"
-        msg = Message::new("PONG", &vec!(), &vec!());
-        assert_eq!(marshal(msg).unwrap(), "EWP 0.2 PONG 0 0\n".as_bytes());
+        msg = Envelope::new("PONG", &vec!(), &vec!());
+        assert_eq!(marshal(msg), "EWP 0.2 PONG 0 0\n".as_bytes());
     }
 
     // 	var test = []struct {
-    // 		encoded encoding.Message
+    // 		encoded encoding.Envelope
     // 		message string
     // 	}{
     // 		{
-    // 			encoded: encoding.Message{
+    // 			encoded: encoding.Envelope{
     // 				Version:     "13.05",
     // 				Protocol:    "RPC",
     // 				Header:     []byte("this is a header"),
@@ -93,7 +93,7 @@ mod tests {
     // 			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body",
     // 		},
     // 		{
-    // 			encoded: encoding.Message{
+    // 			encoded: encoding.Envelope{
     // 				Version:     "13.05",
     // 				Protocol:    "GOSSIP",
     // 				Header:     []byte("testing"),
@@ -102,7 +102,7 @@ mod tests {
     // 			message: "EWP 13.05 GOSSIP 7 12\ntestingtesting body",
     // 		},
     // 		{
-    // 			encoded: encoding.Message{
+    // 			encoded: encoding.Envelope{
     // 				Version:     "1230329483.05392489",
     // 				Protocol:    "RPC",
     // 				Header:     []byte("test"),
@@ -124,11 +124,11 @@ mod tests {
     //
     // func TestMarshal_Unsuccessful(t *testing.T) {
     // 	var test = []struct {
-    // 		encoded encoding.Message
+    // 		encoded encoding.Envelope
     // 		err     error
     // 	}{
     // 		{
-    // 			encoded: encoding.Message{
+    // 			encoded: encoding.Envelope{
     // 				Version:     "",
     // 				Protocol:    "RPC",
     // 				Header:     []byte("this is a header"),
@@ -137,7 +137,7 @@ mod tests {
     // 			err: errors.New("cannot marshal message, version not found"),
     // 		},
     // 		{
-    // 			encoded: encoding.Message{
+    // 			encoded: encoding.Envelope{
     // 				Version:     "1230329483.05392489",
     // 				Protocol:    "",
     // 				Header:     []byte("test"),

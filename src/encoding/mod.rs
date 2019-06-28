@@ -1,14 +1,14 @@
 /// Package encoding implements message encoding and decoding for Hobbits, a Lightweight,
 /// Multiclient Wire Protocol For ETH2.0 Communications.
 
-pub mod message;
+pub mod envelope;
 pub mod marshal;
 pub mod unmarshal;
 
 // publish the public interface to the encoding module
-pub use message::Message;
+pub use envelope::Envelope;
 pub use marshal::marshal;
-//pub use unmarshal::unmarshal;
+pub use unmarshal::unmarshal;
 
 
 use std::error::Error;
@@ -20,7 +20,7 @@ pub struct EwpError {
 }
 
 impl EwpError {
-    fn new(msg: &str) -> EwpError {
+    pub fn new(msg: &str) -> EwpError {
         EwpError{details: msg.to_string()}
     }
 }

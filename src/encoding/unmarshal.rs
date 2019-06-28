@@ -1,8 +1,8 @@
 
-pub use super::message::Message;
-pub use super::EwpError;
+pub use crate::encoding::envelope::Envelope;
+pub use crate::encoding::EwpError;
 
-pub fn unmarshal(msg: &[u8]) -> Result<Message,EwpError> {
+pub fn unmarshal(msg: &[u8]) -> Result<Envelope,EwpError> {
     let index = msg.iter().position(|&r| r == '\n' as u8);
     if index == None { return Err(EwpError::new("message request must contain 2 lines")) }
     let index = index.unwrap();
@@ -48,7 +48,7 @@ pub fn unmarshal(msg: &[u8]) -> Result<Message,EwpError> {
     let msg_hdr = &payload[0..msg_hdr_len];
     let msg_bdy = &payload[msg_hdr_len..];
 
-    Ok( Message {
+    Ok( Envelope {
         version: version.to_string(),
         protocol: protocol.to_string(),
         header: msg_hdr.to_owned(),
@@ -59,18 +59,18 @@ pub fn unmarshal(msg: &[u8]) -> Result<Message,EwpError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Message, unmarshal};
+    use super::{Envelope, unmarshal};
 
     #[test]
     fn test_unmarshal_successful() {
         struct Test {
             message: Vec<u8>, // WARN! we're loading this from utf-8 strings, so don't use non-ascii string content
-            output: Message
+            output: Envelope
         }
         let tests: Vec<Test> = vec!(
     		Test {
     			message: "EWP 13.05 RPC 16 14\nthis is a headerthis is a body".to_string().into_bytes(),
-    			output: Message {
+    			output: Envelope {
     				version:     "13.05".to_string(),
     				protocol:    "RPC".to_string(),
     				header:      "this is a header".to_string().into_bytes(),
@@ -79,7 +79,7 @@ mod tests {
     		},
     		Test {
     			message: "EWP 13.05 GOSSIP 7 12\ntestingtesting body".to_string().into_bytes(),
-    			output: Message {
+    			output: Envelope {
     				version:     "13.05".to_string(),
     				protocol:    "GOSSIP".to_string(),
     				header:      "testing".to_string().into_bytes(),
@@ -88,7 +88,7 @@ mod tests {
     		},
     		Test {
     			message: "EWP 1230329483.05392489 RPC 4 4\ntesttest".to_string().into_bytes(),
-    			output: Message {
+    			output: Envelope {
     				version:     "1230329483.05392489".to_string(),
     				protocol:    "RPC".to_string(),
     				header:      "test".to_string().into_bytes(),

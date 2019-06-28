@@ -12,6 +12,8 @@
 
 pub mod tcp;
 pub mod encoding;
+pub mod codec;
+
 
 #[cfg(test)]
 mod tests {

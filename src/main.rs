@@ -10,24 +10,21 @@ use tokio::net::TcpListener;
 extern crate hobbits;
 
 use hobbits::tcp::server::*;
-use hobbits::encoding::{marshal, unmarshal, Message};
+use hobbits::encoding::{marshal, unmarshal, Envelope};
 
 
 fn main() {
 
-    let msg = Message {
-        version: "0.2".to_string(),
-        protocol: "GOSSIP".to_string(),
-        header:"hdr".as_bytes().to_vec(),
-        body: "body".as_bytes().to_vec(),
-    };
-    println!("{}\n{:?}", msg, msg);
-
-    let serialized = serde_json::to_string(&msg).unwrap();
-    println!("serialized = {}", serialized);
-
-    let deserialized: Message = serde_json::from_str(&serialized).unwrap();
-    println!("deserialized = {:?}", deserialized);
+    // let msg = Envelope {
+    //     version: "0.2".to_string(),
+    //     protocol: "GOSSIP".to_string(),
+    //     header:"hdr".as_bytes().to_vec(),
+    //     body: "body".as_bytes().to_vec(),
+    // };
+    // let serialized = serde_json::to_string(&msg).unwrap();
+    // println!("serialized = {}", serialized);
+    // let deserialized: Envelope = serde_json::from_str(&serialized).unwrap();
+    // println!("deserialized = {:?}", deserialized);
 
 
     // Parse command-line options:
@@ -44,34 +41,41 @@ fn main() {
     let listener = TcpListener::bind(&addr)
         .expect("unable to bind TCP listener");
 
-if true {return};
-
-    let messages: Vec<Message> = vec!();
-
+    println!("listening on {}", addr);
     // Pull out a stream of sockets for incoming connections
     let server = listener.incoming()
         .map_err(|e| eprintln!("accept failed = {:?}", e))
         .for_each(|sock| {
-            // Split up the reading and writing parts of the
-            // socket.
-            let (reader, writer) = sock.split();
+            println!("sock: {:?}", sock);
 
-            // A future that echos the data and returns how
-            // many bytes were copied...
-            let bytes_copied = copy(reader, writer);
+            // create and spawn a handler for this connection; loop immediately for next connection
+            tokio::spawn({
+                // Split up the reading and writing parts of the
+                // socket.
+                let (reader, _writer) = sock.split();
 
-            // ... after which we'll print what happened.
-            let handle_conn = bytes_copied.map(|amt| {
-                println!("wrote {:?} bytes", amt)
-            }).map_err(|err| {
-                eprintln!("IO error {:?}", err)
+                tokio::io::read_to_end(reader, vec!())
+                    .and_then(move |(_, buf)| {
+                        println!("received {} bytes: '{}'", buf.len(), String::from_utf8_lossy(&buf));
+                        let rslt = unmarshal(&buf);
+                        match rslt {
+                            Ok(msg) => {
+                                println!("{}", msg);
+                            }
+                            Err(e) => {
+                                println!("ERROR: {:?}", e);
+                            }
+                        }
+                        Ok(())
+                    })
+                    .map(|_| ())
+                    .map_err(|e| println!("socket error = {:?}", e))
             });
-
-            // Spawn the future as a concurrent task.
-            tokio::spawn(handle_conn)
+            Ok(())
         });
 
     // Start the Tokio runtime
+    println!("starting tokio runtime");
     tokio::run(server);
 }
 
