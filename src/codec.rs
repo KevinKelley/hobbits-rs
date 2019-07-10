@@ -41,9 +41,9 @@ impl Decoder for EwpCodec {
     // Find the next line in buf!
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         let retval = if let Some(offset) = buf.iter().position(|b| *b == b'\n') {
-            // We found a newline character in this buffer...
-            // parse envelope header line; and check if we also have enough bytes for payload
-
+        //     // We found a newline character in this buffer...
+        //     // parse envelope header line; and check if we also have enough bytes for payload
+        //
             match unmarshal(buf) {
                 Ok(msg) => {
                     // success, we got a whole Envelope.
@@ -51,7 +51,7 @@ impl Decoder for EwpCodec {
                     // Cut out the used bytes from the buffer so we don't return it again.
                     let _ = buf.split_to(bytes_used);
                     Some(msg)
-                }
+                },
                 Err(e) => {
                     // fail, envelope didn't parse.  Maybe payload is still coming?
                     // TODO: how to recover, from a malformed Envelope?  Depending on why it failed
@@ -63,13 +63,12 @@ impl Decoder for EwpCodec {
                     //
                     // otherwise, discard the buf and try to continue... could search for '\n' and
                     // back up, to see if it's a valid header for next envelope...
-                    }
                     None
                 }
             }
         } else {
-            // There are no newlines in this buffer, or else not enough payload;
-            // Tokio will make sure to call this again when we have more bytes.
+        //     // There are no newlines in this buffer, or else not enough payload;
+        //     // Tokio will make sure to call this again when we have more bytes.
             None
         };
         Ok(retval)
