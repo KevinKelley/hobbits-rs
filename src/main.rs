@@ -15,18 +15,6 @@ use hobbits::encoding::{marshal, unmarshal, Envelope};
 
 fn main() {
 
-    // let msg = Envelope {
-    //     version: "0.2".to_string(),
-    //     protocol: "GOSSIP".to_string(),
-    //     header:"hdr".as_bytes().to_vec(),
-    //     body: "body".as_bytes().to_vec(),
-    // };
-    // let serialized = serde_json::to_string(&msg).unwrap();
-    // println!("serialized = {}", serialized);
-    // let deserialized: Envelope = serde_json::from_str(&serialized).unwrap();
-    // println!("deserialized = {:?}", deserialized);
-
-
     // Parse command-line options:
     let mut opts = getopts::Options::new();
     opts.optopt("h", "host", "server to connect", "HOST");
