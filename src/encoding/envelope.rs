@@ -1,11 +1,10 @@
 
 extern crate hex;
 use std::fmt;
-use serde::{Serialize, Deserialize};
 
 /// Envelope represents a parsed Hobbits message.
 /// See examples of unparsed and parsed messages here: https://github.com/deltap2p/hobbits/blob/master/specs/protocol.md
-#[derive(Clone, Hash, Default, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, Hash, Default, PartialEq, Debug)]
 pub struct Envelope {
     pub version: String,
     pub protocol: String,

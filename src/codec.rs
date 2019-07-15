@@ -22,7 +22,7 @@ impl Encoder for EwpCodec {
     fn encode(&mut self, msg: Self::Item, buf: &mut BytesMut) -> Result<(), Self::Error> {
 
         // properly we should marshal directly to 'buf'; will refactor later
-        let tmp = marshal(msg);
+        let tmp = marshal(&msg).unwrap();
         buf.reserve(tmp.len());
         buf.put(tmp);
         Ok(())
