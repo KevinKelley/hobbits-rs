@@ -1,4 +1,6 @@
 extern crate bytes;
+extern crate tokio_codec;
+
 use bytes::{BufMut, BytesMut};
 use tokio::codec::{Decoder, Encoder};
 use tokio::prelude::*;
@@ -7,7 +9,7 @@ use crate::encoding::{Envelope, marshal, unmarshal, EwpError};
 
 // This is where we'd keep track of any extra book-keeping information
 // our transport needs to operate.
-struct EwpCodec;
+pub struct EwpCodec;
 
 // Turns errors into std::io::Error
 fn bad_data<E>(_: E) -> std::io::Error {

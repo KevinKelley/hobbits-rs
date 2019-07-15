@@ -11,6 +11,8 @@ pub use marshal::marshal;
 pub use unmarshal::unmarshal;
 
 
+// consolidate multiple error types that we handle/report, under one type 'EwpError'
+
 use std::error::Error;
 use std::fmt;
 

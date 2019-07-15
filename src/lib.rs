@@ -2,6 +2,5 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-pub mod tcp;
+pub mod server;
 pub mod encoding;
-pub mod codec;
