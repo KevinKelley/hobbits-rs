@@ -156,13 +156,5 @@ mod tests {
             println!("{}", t.err);
             //assert!(marshalled == t.message.as_bytes());
         }
-    // 	for i, tt := range test {
-    // 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-    // 			_, err := encoding.Marshal(tt.encoded)
-    // 			if !reflect.DeepEqual(err, tt.err) {
-    // 				t.Errorf("return value of Marshal did not match expected value")
-    // 			}
-    // 		})
-    // 	}
     }
 }
