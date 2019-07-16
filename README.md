@@ -7,6 +7,10 @@
 test like `./conformance --port 12345`
 
 - (To use a different port: `cargo run -- --port 8888` and `./conformance --port 8888`)
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbMTc2NDMxNDUwXX0=
--->
+
+(note: conformance may need to run as sudo, depending on whether your system allows ping)
+
+
+There is still work-in-progress, to simplify usage (and to support streaming of
+Envelopes over a single TCP connection); that's what `src/encoding/codec.rs` is
+for, along with some other stuff not committed yet.
