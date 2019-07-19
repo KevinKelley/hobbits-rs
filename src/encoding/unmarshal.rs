@@ -4,8 +4,7 @@ pub use crate::encoding::EwpError;
 
 pub fn unmarshal(msg: &[u8]) -> Result<Envelope,EwpError> {
     let index = msg.iter().position(|&r| r == '\n' as u8);
-    if index == None { return Err(EwpError::new("message request must contain 2 lines")) }
-    let index = index.unwrap();
+    let index = index.ok_or( EwpError::new("message request must contain 2 lines") )?;
 
     let hdr = &msg[0..index];
     let payload = &msg[(index+1)..];
@@ -15,26 +14,23 @@ pub fn unmarshal(msg: &[u8]) -> Result<Envelope,EwpError> {
     if hdr_parts[0] != "EWP" { return Err(EwpError::new("malformed EWP envelope: must start with 'EWP'")) }
 
     let version = hdr_parts[1];
-    // TODO check for proper version matching regexp(`^(\d+\.)(\d+)*$`)
     if !version.contains('.') { return Err(EwpError::new("EWP version cannot be parsed")) }
+    // check for proper version matching regexp(`^(\d+\.)(\d+)*$`)
+    // (conveniently, that's the format of a standard float)
+    if version.parse::<f32>().is_err() { return Err(EwpError::new("version should be of the form 0.0")) }
 
     let protocol = hdr_parts[2];
     // check for allowed protocol
     if protocol != "GOSSIP"
     && protocol != "RPC"
-    && protocol != "PING" { return Err(EwpError::new("communication protocol unsupported")) }
+    && protocol != "PING"
+    && protocol != "PONG" { return Err(EwpError::new("communication protocol unsupported")) }
 
-    let msg_hdr_len = hdr_parts[3].parse();
-    if let Err(_) = msg_hdr_len {
-        return Err(EwpError::new("incorrect metadata format, cannot parse header-length"))
-    }
-    let msg_hdr_len = msg_hdr_len.unwrap();
+    let msg_hdr_len: usize = hdr_parts[3].parse()
+        .map_err(|_| EwpError::new("incorrect metadata format, cannot parse header-length"))?;
 
-    let msg_bdy_len:Result<usize,std::num::ParseIntError> = hdr_parts[4].parse();
-    if let Err(_) = msg_bdy_len {
-        return Err(EwpError::new("incorrect metadata format, cannot parse body-length"))
-    }
-    let msg_bdy_len:usize = msg_bdy_len.unwrap();
+    let msg_bdy_len: usize = hdr_parts[4].parse()
+        .map_err(|_| EwpError::new("incorrect metadata format, cannot parse body-length"))?;
 
     // check for correctly-parsed sizes, instead of failing out
     // validate payload length matches sum of header and body length
