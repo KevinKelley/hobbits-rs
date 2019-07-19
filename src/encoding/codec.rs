@@ -4,6 +4,7 @@ extern crate tokio_codec;
 use bytes::{BufMut, BytesMut};
 use tokio::codec::{Decoder, Encoder};
 use tokio::prelude::*;
+use {Error, ErrorKind};
 
 use crate::encoding::{Envelope, marshal, unmarshal, EwpError};
 
@@ -13,7 +14,7 @@ pub struct EwpCodec;
 
 // Turns errors into std::io::Error
 fn bad_data<E>(_: E) -> std::io::Error {
-    std::io::Error::new(std::io::ErrorKind::InvalidData, "Unable to decode input")
+    Error::new(ErrorKind::InvalidData, "Unable to decode input")
 }
 
 // Encoding is easy, we marshal our message onto the stream and send the bytes,
@@ -40,7 +41,7 @@ impl Decoder for EwpCodec {
     // Find the next line in buf!
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
 
-        let msg = unmarshal(buf).map_err(std::io::Error::new(std::io::ErrorKind::InvalidData, "unparseable envelope"))?;
+        let msg = unmarshal(buf).map_err(Error::new(ErrorKind::InvalidData, "unparseable envelope"))?;
         // success, we got a whole Envelope.
          let bytes_used = offset + 1 + msg.header.len() + msg.body.len();
          // Cut out the used bytes from the buffer so we don't return it again.
