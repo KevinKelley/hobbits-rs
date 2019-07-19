@@ -40,7 +40,7 @@ impl Decoder for EwpCodec {
     // Find the next line in buf!
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
 
-        let msg = unmarshal(buf).map_err(std::io::Error::new(...))?;
+        let msg = unmarshal(buf).map_err(std::io::Error::new(std::io::ErrorKind::InvalidData, "unparseable envelope"))?;
         // success, we got a whole Envelope.
          let bytes_used = offset + 1 + msg.header.len() + msg.body.len();
          // Cut out the used bytes from the buffer so we don't return it again.
