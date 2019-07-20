@@ -23,8 +23,7 @@ pub fn unmarshal(msg: &[u8]) -> Result<Envelope,EwpError> {
     // check for allowed protocol
     if protocol != "GOSSIP"
     && protocol != "RPC"
-    && protocol != "PING"
-    && protocol != "PONG" { return Err(EwpError::new("communication protocol unsupported")) }
+    && protocol != "PING" { return Err(EwpError::new("communication protocol unsupported")) }
 
     let msg_hdr_len: usize = hdr_parts[3].parse()
         .map_err(|_| EwpError::new("incorrect metadata format, cannot parse header-length"))?;
